@@ -13,12 +13,13 @@
               dense
               append-icon="mdi-magnify"
               placeholder="Search..."
+              clearable
             />
           </v-col>
         </v-row>
       </v-card-title>
       <v-col cols="12">
-        <v-data-table :headers="headers" :items="items" :search="search" />
+        <v-data-table :headers="headers" :items="items" :search="search" :loading="loading" />
       </v-col>
     </v-card>
   </v-container>
@@ -54,7 +55,8 @@ export default {
         }
       ],
       itemsOrigen: [],
-      items: []
+      items: [],
+      loading: false,
     };
   },
   methods: {
@@ -81,9 +83,11 @@ export default {
             });
           });
           this.items = this.itemsOrigen;
+          this.loading = false;
         });
     },
     getNameDivisas() {
+      this.loading = true;
       this.$axios
         .get(
           "https://openexchangerates.org/api/currencies.json?app_id=2eddb9945017483bad6b5a48043eeea4"
