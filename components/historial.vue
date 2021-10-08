@@ -19,7 +19,13 @@
         </v-row>
       </v-card-title>
       <v-col cols="12">
-        <v-data-table :headers="headers" :items="items" :search="search" :loading="loading" />
+        <v-data-table
+          :headers="headers"
+          :items="items"
+          :search="search"
+          :loading="loading"
+          sort-by="name"
+        />
       </v-col>
     </v-card>
   </v-container>
@@ -38,7 +44,7 @@ export default {
         {
           text: "Nombre",
           align: "start",
-          sortable: false,
+          sortable: true,
           value: "name"
         },
         {
@@ -56,7 +62,7 @@ export default {
       ],
       itemsOrigen: [],
       items: [],
-      loading: false,
+      loading: false
     };
   },
   methods: {
