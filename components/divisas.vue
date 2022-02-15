@@ -5,7 +5,7 @@
         <v-card>
           <v-card-text>
             <ValidationObserver ref="observerDivisas">
-              <form ref="form" >
+              <form ref="form">
                 <ValidationProvider
                   v-slot="{ errors }"
                   name="Monto"
@@ -72,7 +72,6 @@ export default {
     return {
       items: [],
       itemsOrigen: [],
-      rates: [],
       selectedOrigin: "",
       selectedObjetive: "",
       amount: 0,
@@ -80,7 +79,8 @@ export default {
       exist: false,
       convert: "",
       historial: [],
-      clear: false
+      clear: false,
+      format: new Intl.NumberFormat()
     };
   },
   async created() {
@@ -94,7 +94,8 @@ export default {
         this.selectedObjetive = "";
         this.amount = "";
         this.clear = false;
-        this.$refs.observerDivisas.errors = {}
+        this.$refs.observerDivisas.reset();
+        this.$refs.form.reset();
       }
     }
   },
@@ -138,7 +139,6 @@ export default {
     convertir() {
       let sourceRate;
       let targetRate;
-      let history = [];
       this.$refs.observerDivisas.validate().then(valid => {
         if (valid) {
           if (this.amount > 0) {
@@ -150,32 +150,29 @@ export default {
               if (item.completeName == this.selectedObjetive) {
                 targetRate = item.rates;
                 this.mountConverted["objetive"] = item.siglas;
-                this.mountConverted["name"] = item.name
+                this.mountConverted["name"] = item.name;
               }
             });
-            this.mountConverted["amount"] = this.amount;
-            this.mountConverted["total"] =
-              (this.amount / sourceRate) * targetRate;
-            this.convert = this.amount.concat(
+            const amount = new Intl.NumberFormat({
+              style: "currency",
+              currency: `${this.mountConverted.origin}`
+            }).format(this.amount);
+            this.mountConverted["amount"] = amount;
+            const total = (this.amount / sourceRate) * targetRate;
+
+            const totalFormat = new Intl.NumberFormat({
+              style: "currency",
+              currency: `${this.mountConverted.objetive}`
+            }).format(total);
+            this.mountConverted["total"] = totalFormat;
+            this.convert = amount.concat(
               " ",
               this.mountConverted.origin,
               ` = ${this.mountConverted.total}`,
               " ",
               this.mountConverted.objetive
             );
-            this.mountConverted["covert"] = this.convert
-            history = localStorage.getItem("historial")
-              ? JSON.parse(localStorage.getItem("historial"))
-              : [];
-            if (history !== null && history.length > 0) {
-              history.push(this.mountConverted);
-              localStorage.setItem("historial", JSON.stringify(history));
-            } else {
-              localStorage.setItem(
-                "historial",
-                JSON.stringify([this.mountConverted])
-              );
-            }
+            this.mountConverted["covert"] = this.convert;
             this.clear = true;
           } else {
             swal("Error", "El monto debe ser mayor a 0", "error");
